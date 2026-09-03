@@ -932,9 +932,100 @@
     .quiz-card{ padding:32px 22px; }
     .quiz-question{ font-size:1.25rem; }
   }
+
+  /* ================= PASSWORD GATE ================= */
+  #gate{
+    position:fixed;
+    inset:0;
+    z-index:9999;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:
+      radial-gradient(1200px 600px at 20% -10%, var(--sky-pale), transparent),
+      radial-gradient(1000px 500px at 100% 0%, var(--sky-soft), transparent),
+      linear-gradient(180deg, var(--sky-mist), #ffffff 60%);
+    transition:opacity .5s ease, visibility .5s ease;
+  }
+  #gate.unlocked{ opacity:0; visibility:hidden; pointer-events:none; }
+  .gate-card{
+    background:var(--cream);
+    border-radius:18px;
+    padding:40px 34px;
+    max-width:340px;
+    width:100%;
+    text-align:center;
+    box-shadow:var(--shadow);
+  }
+  .gate-eyebrow{
+    letter-spacing:.3em;
+    text-transform:uppercase;
+    font-size:.7rem;
+    color:var(--sky-deep);
+    margin-bottom:14px;
+  }
+  .gate-title{
+    font-family:'Playfair Display', serif;
+    font-size:1.5rem;
+    color:var(--sky-deepest);
+    margin-bottom:22px;
+  }
+  #gate-input{
+    width:100%;
+    font-family:'Cormorant Garamond', serif;
+    font-size:1.1rem;
+    padding:12px 16px;
+    border:1px solid var(--sky-soft);
+    border-radius:30px;
+    text-align:center;
+    outline:none;
+    background:#fff;
+    color:var(--ink);
+    margin-bottom:16px;
+  }
+  #gate-input:focus{ border-color:var(--sky-deep); }
+  #gate-submit{
+    background:var(--sky-deepest);
+    color:#fff;
+    border:none;
+    border-radius:30px;
+    padding:11px 30px;
+    font-family:'Cormorant Garamond', serif;
+    font-size:1rem;
+    letter-spacing:.05em;
+    cursor:pointer;
+    box-shadow:var(--shadow);
+  }
+  #gate-error{
+    margin-top:14px;
+    font-size:.9rem;
+    color:#b3495c;
+    min-height:1.2em;
+  }
+  .gate-hint{
+    margin-top:10px;
+    font-size:.82rem;
+    color:var(--sky-deep);
+    opacity:.75;
+    font-style:italic;
+  }
 </style>
 </head>
 <body>
+
+<!-- ============ PASSWORD GATE ============ -->
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-eyebrow">this is just for you</div>
+    <div class="gate-title">Enter the password, love</div>
+    <input id="gate-input" type="password" placeholder="•••••••" autocomplete="off">
+    <br>
+    <button id="gate-submit" type="button">Unlock</button>
+    <div id="gate-error"></div>
+    <div class="gate-hint">Hint: our monthsary date</div>
+  </div>
+</div>
 
 <!-- ============ COVER ============ -->
 <div id="cover">
@@ -1513,6 +1604,41 @@
     restartBtn.addEventListener('click', restartQuiz);
 
     renderQuestion();
+  })();
+
+  /* ============ PASSWORD GATE ============ */
+  (function(){
+    // CUSTOMIZE ME: change this to whatever password you want her to type.
+    const PASSWORD = "02/14/26"; // <-- palitan mo ito ng gusto mong password
+
+    const gate = document.getElementById('gate');
+    const input = document.getElementById('gate-input');
+    const submitBtn = document.getElementById('gate-submit');
+    const errorEl = document.getElementById('gate-error');
+
+    function tryUnlock(){
+      const value = (input.value || '').trim().toLowerCase();
+      if (value === PASSWORD.toLowerCase()) {
+        gate.classList.add('unlocked');
+        try { sessionStorage.setItem('gate-unlocked', '1'); } catch(e){}
+      } else {
+        errorEl.textContent = "Hmm, try again love.";
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    submitBtn.addEventListener('click', tryUnlock);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') tryUnlock();
+    });
+
+    // Stay unlocked if she already entered it this session (so back/refresh doesn't re-lock mid-visit)
+    try {
+      if (sessionStorage.getItem('gate-unlocked') === '1') {
+        gate.classList.add('unlocked');
+      }
+    } catch(e){}
   })();
 </script>
 
